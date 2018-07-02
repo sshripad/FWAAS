@@ -1,0 +1,42 @@
+---
+- hosts: FWAAS
+  gather_facts: no
+  become: true
+
+  tasks:
+  - name: Check for qemu-kvm
+    apt:
+       name: qemu-kvm
+       state: present
+      
+  - name: Check for libvirt packages and ovs
+    apt:
+     name: "{{ item }}"
+     state: present
+    with_items:
+       - libvirt-bin
+       - virt-manager
+       - virt-viewer
+       - virtinst  
+       - openvswitch-switch
+   
+  - name: Make sure ubuntu image exists
+    docker_image:
+      name: ubuntu
+      state: present 
+  - name: copy DockerFile
+    copy:
+      src: ~/ProjectFinal/dockerfile
+      dest: "~/dockerfile"
+
+  - name: Build an image using dockerfile
+    docker_image:
+      path: ~/
+      name: firewall_image
+      state: present 
+
+  - name: Build an image using dockerfile
+    docker_image:
+      path: ~/
+      name: vm_image
+      state: present

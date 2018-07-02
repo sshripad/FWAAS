@@ -1,0 +1,9 @@
+
+host@host-Standard-PC-i440FX-PIIX-1996:~$ 
+host@host-Standard-PC-i440FX-PIIX-1996:~$ 
+host@host-Standard-PC-i440FX-PIIX-1996:~$ 
+host@host-Standard-PC-i440FX-PIIX-1996:~$ 
+host@host-Standard-PC-i440FX-PIIX-1996:~$ 
+host@host-Standard-PC-i440FX-PIIX-1996:~$ sudo docker exec 1-FW1 cat /var/logs/a lertLogs
+host@host-Standard-PC-i440FX-PIIX-1996:~$ 
+host@host-Standard-PC-i440FX-PIIX-1996:~$ sudo docker exec 1-FW1 cat /var/logs/a lertLogs

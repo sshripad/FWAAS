@@ -1,0 +1,144 @@
+- hosts: FWAAS
+  gather_facts: no
+  become: true
+  vars:
+    var1: "{{tenant_name}}"
+  tasks:
+
+  - name: Check for qemu-kvm
+    apt:
+       name: qemu-kvm
+       state: present
+
+  - name: Check for libvirt packages and ovs
+    apt:
+     name: "{{ item }}"
+     state: present
+    with_items:
+       - libvirt-bin
+       - virt-manager
+       - virt-viewer
+       - virtinst
+       - openvswitch-switch
+
+  - name: Make sure ubuntu image exists
+    docker_image:
+      name: ubuntu
+      state: present
+  - name: copy DockerFile
+    copy:
+      src: ~/ProjectFinal/dockerfile
+      dest: ~/dockerfile
+
+  - name: Build an image using dockerfile
+    docker_image:
+      path: ~/
+      name: firewall_image
+      state: present
+
+  - name: Build an image using dockerfile
+    docker_image:
+      path: ~/
+      name: vm_image
+      state: present
+
+  - name: Create inventory
+    copy:
+      src: "~/ProjectFinal/{{var1}}_device_inventory.yml"
+      dest: "~/{{var1}}_device_inventory.yml"
+
+  - name: Create inventory
+    copy:
+      src: "~/ProjectFinal/{{var1}}_device_inventory.yml"
+      dest: "/home/host/{{var1}}_device_inventory.yml"
+
+  - name: read the vars_file
+    include_vars:
+      file: "~/ProjectFinal/{{var1}}_device_inventory.yml"
+      name: names
+
+  - name: Create an OvS bridge
+    openvswitch_bridge:
+       bridge: '{{ item }}'
+       state: present
+    with_items:
+      - "{{ names.OVSbridge_names}}"
+
+  - name: Create namespaces
+    command: sudo ip netns add "{{ item }}"
+    with_items:
+      - "{{ names.Namespace_names }}"
+
+  - name: spwan the Firewalls
+    docker_container:
+      image: firewall_image
+      name: "{{item}}"
+      state: started
+      hostname: "{{item}}"
+      privileged: yes
+      interactive: yes
+      tty: yes
+    with_items:
+      - "{{ names.FWcontainer_names }}"
+
+  - name: spwan the Virtual Machines
+    docker_container:
+      image: vm_image
+      name: "{{item}}"
+      state: started
+      hostname: "{{item}}"
+      privileged: yes
+      interactive: yes
+      tty: yes
+    with_items:
+      - "{{ names.VMcontainer_names }}"
+
+  - name: Copy CollectD config
+    copy:
+       src: ~/ProjectFinal/conntrackd1.conf
+       dest: ~/conntrackd1.conf
+
+  - name: Copy CollectD config
+    copy:
+       src: ~/ProjectFinal/conntrackd2.conf
+       dest: ~/conntrackd2.conf
+
+  - name: Copy KeepaliveD config
+    copy:
+       src: ~/ProjectFinal/keepalivedm.conf
+       dest: ~/keepalivedm.conf
+
+  - name: Copy KeepaliveD config
+    copy:
+       src: ~/ProjectFinal/keepaliveds.conf
+       dest: ~/keepaliveds.conf
+
+  - name: Copy High-availability script
+    copy:
+       src: ~/ProjectFinal/primary-backup.sh
+       dest: ~/primary-backup.sh
+
+  - name: Remove all VM containers from Bridge0
+    command: docker network disconnect bridge "{{ item }}"
+    with_items:
+      - "{{ names.VMcontainer_names}}"
+    ignore_errors: yes
+
+  - name: Remove all FW containers from Bridge0
+    command: docker network disconnect bridge "{{ item }}"
+    with_items:
+      - "{{ names.FWcontainer_names}}"
+    ignore_errors: yes
+
+  - name: Setup Network script
+    copy:
+       src: ~/ProjectFinal/connectivity.py
+       dest: ~/connectivity.py
+
+  - name: Copy ulogd config file
+    copy:
+       src: ~/ProjectFinal/ulogd.conf
+       dest: ~/ulogd.conf
+
+  - name: Run Connectivity Script
+    command: sudo python ~/connectivity.py "{{ var1 }}"

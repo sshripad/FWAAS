@@ -1,0 +1,1 @@
+{"VPC": [{"noOfSubnets": 2, "tenantName": "arpita", "internalDetails": [{"internalFirewallNeeded": "y", "subnetID": "1", "firewallType": "d", "noOfVMs": 1, "subnetName": "sub1", "FW_fileName": "FW_arpita_sub1.txt"}, {"internalFirewallNeeded": "y", "subnetID": "2", "firewallType": "s", "noOfVMs": 2, "subnetName": "sub2", "FW_fileName": "FW_arpita_sub2.txt"}], "tenantID": "1"}]}

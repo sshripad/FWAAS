@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  gather_facts: no
+  become: true
+
+  tasks:
+  - name: Make sure ubuntu image exists
+    docker_image:
+      name: ubuntu
+      state: present 
+  
+  - name: Build an image using dockerfile
+    docker_image:
+      path: "{{playbook_dir}}"
+      name: vm_image
+      state: present 

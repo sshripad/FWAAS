@@ -1,0 +1,22 @@
+---
+
+FWcontainer_names:
+  - 1-FW1
+  - 1-FW2
+  - 1-S-1-FW1
+  - 1-S-1-FW2
+VMcontainer_names:
+  - 1-S-1-V-4
+  - 1-S-1-V-5
+
+OVSbridge_names:
+  - 1-OVS-n
+  - 1-OVS-s
+  - 1-S-1-southBr
+  - 1-S-1-northBr
+  - 1-S-1-Br
+
+Namespace_names:
+  - 1-north
+  - 1-south
+  - 1-S-1-S

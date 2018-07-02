@@ -1,0 +1,40 @@
+- hosts: FWAAS
+  gather_facts: no
+  become: true
+  vars:
+    var1: "{{tenant_name}}"
+  tasks:
+
+  - name: read the vars_file
+    include_vars:
+      file: "~/ProjectFinal/{{var1}}_device_inventory.yml"
+      name: names
+
+  - name: Delete namespaces
+    command: sudo ip netns del "{{ item }}"
+    with_items:
+      - "{{ names.Namespace_names }}"
+
+  - name: Delete OvS bridges
+    openvswitch_bridge:
+       bridge: '{{ item }}'
+       state: absent
+    with_items:
+      - "{{ names.OVSbridge_names}}"
+
+  - name: Delete the Firewalls
+    docker_container:
+      image: firewall_image
+      name: "{{item}}"
+      state: absent
+    with_items:
+      - "{{ names.FWcontainer_names }}"
+
+  - name: delete the Virtual Machines
+    docker_container:
+      image: vm_image
+      name: "{{item}}"
+      state: absent
+    with_items:
+      - "{{ names.VMcontainer_names }}"
+  
